@@ -45,3 +45,24 @@ INSERT INTO salaries VALUES
 (3, 70000),
 (4, 45000),
 (6, 80000);
+
+select * from employees;
+select * from departments;
+select * from projects;
+select * from salaries;
+
+-- inner join
+select * from employees e
+join departments d
+on e.dept_id = d.dept_id;
+
+-- left join
+select * from employees e
+left join departments d
+on e.dept_id = d.dept_id;
+
+-- right join
+select * from employees e
+right join departments d
+on e.dept_id = d.dept_id;
+
