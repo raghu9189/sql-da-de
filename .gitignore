@@ -1,0 +1,6 @@
+# Editor and OS files
+.vscode/
+.DS_Store
+
+# Session files
+*.session.sql
