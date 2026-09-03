@@ -124,3 +124,4 @@ from
 where
     name like "%a%a%"
     and name not like "%a%a%a%";
+
