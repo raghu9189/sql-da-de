@@ -49,8 +49,70 @@ group by d.department_name
 having count(e.employee_id) > 1;
 
 -- 4. Find the highest salary in each department.
+select 
+	d.department_name,
+    max(e.salary) as highest_salary
+from employees e
 
+join departments d
+on e.department_id = d.department_id
 
+group by d.department_name;
+
+-- 5. Find products with total sales greater than ₹100,000.
+
+select 
+	p.product_name,
+    sum(oi.quantity * p.price) as total_sales
+from orders o 
+
+join order_items oi
+on o.order_id = oi.order_id
+
+join products p
+on oi.product_id = p.product_id
+
+group by p.product_id
+having sum(oi.quantity * p.price) > 100000;
+
+-- 6. Find customers who placed more than 3 orders.
+select 
+	c.customer_name,
+    count(*) as orders_count
+from customers c
+
+join orders o
+on c.customer_id = o.customer_id
+
+group by c.customer_id
+having count(o.order_id) > 3;
+
+-- 7. Find the number of employees in each department.
+
+select 
+	d.department_name,
+    count(*) as emp_count
+from employees e
+
+join departments d
+on e.department_id = d.department_id
+group by d.department_name;
+
+-- 8. Find the percentage contribution of each product to total sales. (problem pending)
+
+select 
+	p.product_name,
+    sum(oi.quantity * p.price) as total_sales
+from
+orders o
+
+join order_items oi
+on o.order_id = oi.order_id
+
+join products p
+on oi.product_id = p.product_id
+
+group by p.product_name;
 
 
 
