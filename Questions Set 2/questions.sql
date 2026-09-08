@@ -15,11 +15,9 @@
 -- 4. Find customers whose order value is greater than the average order value.
 -- 5. Find the highest-paid employee in each department.
 -- 6. Find products that have never been ordered.
-
 -- 3. Correlated Subquery Practice
 -- 1. Employees above their department average 
 -- 2. Employees with the second-highest salary in their department
-
 -- 1. Find total sales by customer.
 select c.customer_id,
     c.customer_name,
@@ -72,94 +70,86 @@ from employees e
 group by d.department_name;
 -- 8. Find the percentage contribution of each product to total sales. (problem pending)
 select p.product_name,
-    sum(oi.quantity * p.price) as total_sales
+    sum(oi.quantity * p.price) as prod_total_sales,
+    (
+        select sum(oi.quantity * p.price)
+        from orders o
+            join order_items oi on o.order_id = oi.order_id
+            join products p on oi.product_id = p.product_id
+    ) as total_sales,
+    sum(oi.quantity * p.price) /(
+        select sum(oi.quantity * p.price)
+        from orders o
+            join order_items oi on o.order_id = oi.order_id
+            join products p on oi.product_id = p.product_id
+    ) * 100 as contribution_per
 from orders o
     join order_items oi on o.order_id = oi.order_id
     join products p on oi.product_id = p.product_id
 group by p.product_name;
-
 -- 1. Find the second-highest salary.
-
-select max(salary) from employees 
-where salary < (select max(salary) from employees);
-
+select max(salary)
+from employees
+where salary < (
+        select max(salary)
+        from employees
+    );
 -- 2. Find employees earning more than the average salary.
-select 
-	employee_name,
+select employee_name,
     salary
 from employees
 where salary > (
-select avg(salary) from employees);
-
+        select avg(salary)
+        from employees
+    );
 -- 3. Find employees earning the maximum salary.
-
-select 
-	employee_name,
+select employee_name,
     salary
 from employees
-where salary = (select max(salary) from employees);
-
+where salary = (
+        select max(salary)
+        from employees
+    );
 -- 4. Find customers whose order value is greater than the average order value. (pending)
 -- 5. Find the highest-paid employee in each department.
-
-select 
-	d.department_name,
-	e.employee_name,
+select d.department_name,
+    e.employee_name,
     e.salary
 from employees e
-join departments d
-on e.department_id = d.department_id
+    join departments d on e.department_id = d.department_id
 where e.salary = (
-select max(e2.salary) 
-from 
-employees e2 
-where e2.department_id = e.department_id
-);
+        select max(e2.salary)
+        from employees e2
+        where e2.department_id = e.department_id
+    );
 -- 6. Find products that have never been ordered.
-
-select * from products 
+select *
+from products
 where product_id not in (
-select distinct p.product_id
-from orders o
-join order_items oi
-on o.order_id = oi.order_id
-join products p 
-on oi.product_id = p.product_id
-);
-
+        select distinct p.product_id
+        from orders o
+            join order_items oi on o.order_id = oi.order_id
+            join products p on oi.product_id = p.product_id
+    );
 -- 1. Employees above their department average 
-select 
-	e.employee_name,
+select e.employee_name,
     d.department_name,
     e.salary
 from employees e
-
-join departments d 
-on e.department_id = d.department_id
+    join departments d on e.department_id = d.department_id
 where e.salary > (
-select 
-	avg(e2.salary) 
-from employees e2
-where e.department_id = e2.department_id
-);
-
+        select avg(e2.salary)
+        from employees e2
+        where e.department_id = e2.department_id
+    );
 -- 2. Employees with the second-highest salary in their department
-select 
-	e.employee_name,
+select e.employee_name,
     d.department_name,
     e.salary
 from employees e
-
-join departments d 
-on e.department_id = d.department_id
-
-
+    join departments d on e.department_id = d.department_id
 where e.salary < (
-select 
-	max(e2.salary)
-from employees e2
-where e.department_id = e2.department_id
-
-)
-;
-
+        select max(e2.salary)
+        from employees e2
+        where e.department_id = e2.department_id
+    );
