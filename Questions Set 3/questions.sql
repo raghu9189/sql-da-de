@@ -13,6 +13,17 @@
 -- 9. **For each product, calculate its sales along with its percentage contribution to the total sales.**
 -- 10. **Calculate a 3-order moving average of sales for each customer using a window frame.**
 
+### Window Functions — Interview Practice
+-- 11. **Calculate the running total of sales for each customer ordered by order date.** (already there 7th)
+-- 12. **Calculate cumulative sales for each product ordered by order date.**
+-- 13. **Calculate a 3-order moving average of sales for each customer using a window frame.**
+-- 14. **For each month, find the previous month's total sales.**
+-- 15. **For each month, find the next month's total sales.**
+-- 16. **Calculate the month-over-month sales growth percentage.**
+-- 17. **For each employee, show their salary compared with the average salary of their department.**
+-- 18. **For each customer, find their first and last transaction date.**
+
+
 -- 1. **Find the rank of each employee based on salary across the company.**
 select 
 	employee_name,
@@ -186,4 +197,30 @@ select
         rows between 2 preceding and current row
     ) as mv_avg
 from total_sales_2;
+
+-- 12. **Calculate cumulative sales for each product ordered by order date.**
+with prod_sales_2 as (
+select 
+	p.product_id,
+	o.order_id,
+    o.order_date,
+    sum(oi.quantity * p.price) as total_sale
+from orders o
+
+join order_items oi
+on o.order_id = oi.order_id
+
+join products p
+on oi.product_id = p.product_id
+group by p.product_id,
+	o.order_id,
+    o.order_date)
+
+select 
+	product_id,
+    order_id,
+    order_date,
+    total_sale,
+    sum(total_sale) over( partition by product_id order by order_date) as cum_sale
+from prod_sales_2;
 
