@@ -350,4 +350,116 @@ select
 		partition by customer_id 
         order by order_date, order_id
         ) as order_number
-from orders 
+from orders;
+
+-- Days Since Previous Order
+-- For each customer, calculate how many days passed between their current order and their previous order.
+select 
+	customer_id,
+    order_id,
+    order_date,
+    previous_order_date,
+    datediff(order_date, previous_order_date) as days
+from (
+select 
+	customer_id,
+    order_id,
+    order_date,
+    lag(order_date) over(partition by customer_id order by order_date, order_id ) as previous_order_date
+from orders) t;
+
+-- Customer's Order Amount Change
+-- For each customer, calculate the difference between the current order amount and their previous order amount.
+with previous_order_sales as (
+select
+	customer_id,
+    order_id,
+    order_date,
+    order_amount,
+    lag(order_amount, 1) over(partition by customer_id order by order_date, order_id) as previous_order_amount
+from orders)
+select 
+	customer_id,
+    order_id,
+    order_date,
+    order_amount,
+    order_amount - previous_order_amount as amount_difference
+from previous_order_sales;
+-- Customer Order Amount Growth %
+-- For each customer, calculate the percentage change in order amount compared with their previous order.
+with previous_amount_sales as  (
+select 
+	customer_id,
+    order_id,
+    order_date,
+    order_amount,
+    lag(order_amount, 1) over(partition by customer_id order by order_date, order_id )as previous_order_amount
+from orders)
+
+select 
+	customer_id,
+    order_id,
+    order_date,
+    order_amount,
+    (order_amount - previous_order_amount)/previous_order_amount * 100 as amount_growth_percent
+from previous_amount_sales;
+
+-- Running Customer Spend
+-- For each customer, calculate their cumulative order amount up to each order.
+select
+	customer_id,
+    order_id,
+    order_date,
+    order_amount,
+    sum(order_amount) over(
+		partition by customer_id
+        order by order_date, order_id
+        rows between unbounded preceding and current row
+    ) as running_customer_spend
+    from orders;
+    
+    -- Customer's % of Total Spend
+    -- For every order, calculate what percentage of that customer's total lifetime spending that order represents.
+with customers_with_total_spends as (
+select
+	customer_id,
+	order_id,
+	order_amount,
+    sum(order_amount) over(partition by customer_id) as customer_total_spend
+from orders)
+
+select 
+	customer_id,
+	order_id,
+	order_amount,
+    (order_amount/nullif(customer_total_spend, 0)) * 100 as percentage_of_customer_spend 
+from customers_with_total_spends;
+
+-- Running Percentage of Customer Spend
+-- For each order, calculate what percentage of the customer's final/lifetime spending has been accumulated up to that order.
+with customers_with_total_spends as (
+select
+	customer_id,
+    order_id,
+    order_date,
+    order_amount,
+    sum(order_amount) over(partition by customer_id) as customer_total_spend,
+	sum(order_amount) over(partition by customer_id order by order_date, order_id
+		rows between unbounded preceding and current row
+    ) as running_customer_spend
+from orders)
+
+select 
+	customer_id,
+    order_id,
+    order_date,
+    order_amount,
+    customer_total_spend,
+    running_customer_spend,
+    (running_customer_spend/customer_total_spend) * 100 as running_spend_percent
+from customers_with_total_spends;
+-- Customer Order Status Sequence
+-- Using the orders table, assign a sequence number to each customer's orders based on order date, but this time use RANK().
+select 
+*
+from orders ;

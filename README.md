@@ -10,6 +10,7 @@ This repository contains SQL scripts and queries used for data analysis and data
 - `Customer Sales Project/`: A complete SQL project containing schemas, queries, and data on customer sales.
 - `Questions Set 2/`: SQL query challenges and solutions involving correlated subqueries.
 - `Questions Set 3/`: SQL query challenges and solutions involving window functions.
+- `practice_project_01/`: SQL practice queries including joins and window functions.
 
 ## Usage
 You can run these SQL scripts against your database to create the necessary schemas and perform analysis.
