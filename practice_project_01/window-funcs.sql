@@ -458,8 +458,48 @@ select
     running_customer_spend,
     (running_customer_spend/customer_total_spend) * 100 as running_spend_percent
 from customers_with_total_spends;
--- Customer Order Status Sequence
--- Using the orders table, assign a sequence number to each customer's orders based on order date, but this time use RANK().
+-- First Value in Window
+-- The first_salary_in_department should be the lowest salary in that employee's department.
+select
+	employee_name,
+	department,
+	salary,
+    first_value(salary) over(partition by department order by salary) as first_salary_in_department
+from employees;
+
+-- Last Value in Window
+-- Using the employees table, find the highest salary in each department using LAST_VALUE().
+select
+	employee_name,
+	department,
+	salary,
+    last_value(salary) over(
+		partition by department 
+        order by salary
+        rows between unbounded preceding and unbounded following
+        ) as last_salary_in_department
+from employees;
+-- Ignore NULLs: FIRST_VALUE()
+select
+	sale_id,
+	sale_date,
+	sales_amount,
+    first_value(sales_amount) over(
+        order by sales_amount is null, sale_date, sale_id
+        rows between unbounded preceding and unbounded following
+    ) as first_non_null_value
+from sales;
+
+-- Cumulative Maximum
+-- Using the sales table, calculate the highest sales amount seen so far for each salesperson.
 select 
-*
-from orders ;
+	salesperson,
+    sale_date,
+    sale_id,
+    sales_amount,
+    max(sales_amount) over(
+		partition by salesperson
+        order by sale_date, sale_id
+        rows between unbounded preceding and current row
+    ) as cumulative_max
+from sales;
