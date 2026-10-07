@@ -4,3 +4,5 @@
 
 # Session files
 *.session.sql
+
+sql_date_time_interview_dataset.sql
